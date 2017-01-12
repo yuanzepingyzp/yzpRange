@@ -1,0 +1,46 @@
+var yzpRange=angular.module("app",[]);
+yzpRange.directive("yzpRange",function(){
+	return{
+		scope:{
+			startRange:'=',
+			endRange:'=',
+			yzpValue:'=',
+			length:'@'
+		},
+		template:'<div class="yzpRange" style="width:{{length}}px;"><div class="colorRange" style="width:{{colorLength}}px"></div><button yzp-drag="slide()"></button></div>',
+		replace:true,
+		link:function(scope){
+			scope.colorLength=scope.yzpValue*scope.length;
+			var startLength=scope.colorLength;
+			scope.slide=function(){
+				scope.colorLength=startLength+scope.yzpDrag.mousepositionX-scope.yzpDrag.mousedownstartX;
+			}
+		}
+	}
+})
+.directive("yzpDrag",function(){
+	return{
+		restrict:'A',
+		link:function($scope,$elm,$attrs){
+			$scope.yzpDrag={};
+			$elm.bind("mousedown",function(event){
+				$scope.yzpDrag.onDrag=true;
+				$scope.yzpDrag.mousedownstartX=event.layerX;
+				$scope.yzpDrag.mousedownstartY=event.layerY;
+				$scope.yzpDrag.elementstartX=$scope.x;
+				$scope.yzpDrag.elementstartY=$scope.y;
+			});
+			$elm.bind("mousemove",function(event){
+				$scope.yzpDrag.mousepositionX=event.layerX;
+				if($scope.yzpDrag.onDrag){
+					$scope.$apply(function(){
+						$scope.$eval($attrs.yzpDrag);
+					})
+				}
+			});
+			$elm.bind("mouseup",function(){
+				$scope.yzpDrag.onDrag=false;
+			})
+		}
+	}
+})
